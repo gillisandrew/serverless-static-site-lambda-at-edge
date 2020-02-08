@@ -10,7 +10,7 @@ module.exports = {
     mode: isLocal ? 'development' : 'production',
     entry: slsw.lib.entries,
     externals: [nodeExternals()],
-    devtool: 'source-map',
+    devtool: false,
     resolve: {
         extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     },
@@ -25,7 +25,24 @@ module.exports = {
             {
                 test: /\.(ts|js)x?$/,
                 exclude: /node_modules/,
-                use: ['babel-loader'],
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        babelrc: false,
+                        presets: [
+                            [
+                                '@babel/preset-env',
+                                {
+                                    targets: {
+                                        node: 'current',
+                                    },
+                                },
+                            ],
+                            ['@babel/preset-typescript'],
+                        ],
+                        plugins: [],
+                    },
+                },
             },
         ],
     },

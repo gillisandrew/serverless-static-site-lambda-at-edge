@@ -25,15 +25,24 @@ module.exports = {
             {
                 test: /\.(ts|js)x?$/,
                 exclude: /node_modules/,
-                use: [
-                    {
-                        loader: 'cache-loader',
-                        options: {
-                            cacheDirectory: path.resolve('.cache'),
-                        },
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        babelrc: false,
+                        presets: [
+                            [
+                                '@babel/preset-env',
+                                {
+                                    targets: {
+                                        node: 'current',
+                                    },
+                                },
+                            ],
+                            ['@babel/preset-typescript'],
+                        ],
+                        plugins: ['source-map-support'],
                     },
-                    'babel-loader',
-                ],
+                },
             },
         ],
     },

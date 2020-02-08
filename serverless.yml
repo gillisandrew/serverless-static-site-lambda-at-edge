@@ -1,10 +1,11 @@
-service: serverless-template
-
+service: serverless-static-site-lambda-at-edge
 package:
   individually: true
 provider:
   name: aws
   runtime: nodejs12.x
+  region: us-east-1
+  role: FunctionRole
   environment:
     FN_PROJECT: ${file(./variables.${opt:stage, 'dev'}.yml):project}
     FN_ENVIRONMENT: ${file(./variables.${opt:stage, 'dev'}.yml):environment}
@@ -14,10 +15,14 @@ provider:
 
 
 functions:
-  default:
-    handler: src/default.handler
+  origin-request:
+    handler: src/origin-request.handler
     environment:
-      FN_NAME: "serverless-template@default"
+      FN_NAME: "${self:service}.origin-request"
+  origin-response:
+    handler: src/origin-response.handler
+    environment:
+      FN_NAME: "${self:service}.origin-response"
 
 plugins:
   - serverless-webpack
@@ -26,3 +31,21 @@ custom:
   webpack:
     webpackConfig: webpack.${opt:stage, 'dev'}.js
     includeModules: true
+
+resources:
+  Resources:
+    FunctionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - edgelambda.amazonaws.com
+                  - lambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
