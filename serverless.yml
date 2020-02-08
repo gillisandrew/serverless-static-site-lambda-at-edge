@@ -1,0 +1,28 @@
+service: serverless-template
+
+package:
+  individually: true
+provider:
+  name: aws
+  runtime: nodejs12.x
+  environment:
+    FN_PROJECT: ${file(./variables.${opt:stage, 'dev'}.yml):project}
+    FN_ENVIRONMENT: ${file(./variables.${opt:stage, 'dev'}.yml):environment}
+  tags:
+    Project: ${file(./variables.${opt:stage, 'dev'}.yml):project}
+    Environment: ${file(./variables.${opt:stage, 'dev'}.yml):environment}
+
+
+functions:
+  default:
+    handler: src/default.handler
+    environment:
+      FN_NAME: "serverless-template@default"
+
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    webpackConfig: webpack.${opt:stage, 'dev'}.js
+    includeModules: true
