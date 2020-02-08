@@ -3,26 +3,19 @@ package:
   individually: true
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs10.x
   region: us-east-1
   role: FunctionRole
-  environment:
-    FN_PROJECT: ${file(./variables.${opt:stage, 'dev'}.yml):project}
-    FN_ENVIRONMENT: ${file(./variables.${opt:stage, 'dev'}.yml):environment}
   tags:
     Project: ${file(./variables.${opt:stage, 'dev'}.yml):project}
     Environment: ${file(./variables.${opt:stage, 'dev'}.yml):environment}
 
 
 functions:
-  origin-request:
+  originRequest:
     handler: src/origin-request.handler
-    environment:
-      FN_NAME: "${self:service}.origin-request"
-  origin-response:
+  originResponse:
     handler: src/origin-response.handler
-    environment:
-      FN_NAME: "${self:service}.origin-response"
 
 plugins:
   - serverless-webpack
@@ -49,3 +42,10 @@ resources:
                 - sts:AssumeRole
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    StackNameParam:
+      Type: AWS::SSM::Parameter
+      Properties: 
+        Name: /${file(./variables.${opt:stage, 'dev'}.yml):project}/${file(./variables.${opt:stage, 'dev'}.yml):environment}/static-site-lambda-at-edge-stack
+        Type: String
+        Value:
+          Ref: AWS::StackName
